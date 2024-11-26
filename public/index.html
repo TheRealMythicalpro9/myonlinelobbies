@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Lobby Selection</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f4f4f4;
+      }
+
+      h1 {
+        margin-bottom: 20px;
+      }
+
+      .lobby-container {
+        width: 80%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        overflow-y: scroll;
+        max-height: 60vh;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: white;
+        padding: 10px;
+      }
+
+      .lobby-button {
+        width: 90%;
+        max-width: 300px;
+        height: 40px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        text-align: center;
+      }
+
+      .lobby-button:hover {
+        background-color: #0056b3;
+      }
+
+      .menu-container {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .menu-button {
+        width: 150px;
+        height: 50px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .menu-button:hover {
+        background-color: #218838;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Select a Lobby</h1>
+
+    <!-- Menu Buttons -->
+    <div class="menu-container">
+      <button class="menu-button">Create a Private Lobby</button>
+      <button class="menu-button">Join with a Code</button>
+    </div>
+
+    <!-- Lobby Buttons -->
+    <div class="lobby-container">
+      <!-- Lobby buttons dynamically generated using JavaScript -->
+      <script>
+        for (let i = 1; i <= 25; i++) {
+          const button = document.createElement("button");
+          button.className = "lobby-button";
+          button.textContent = `Lobby ${i}`;
+          button.onclick = () => {
+            window.location.href = `/lobbies/lobby${i}/lobby${i}.html`;
+          };
+          document.querySelector(".lobby-container").appendChild(button);
+        }
+      </script>
+    </div>
+  </body>
+</html>
