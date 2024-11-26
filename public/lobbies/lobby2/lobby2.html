@@ -3,13 +3,12 @@
   <head>
     <title>Immuno Chat - Lobby ‘2’</title>
     <link rel="shortcut icon" type="image/x-icon" href="Logo.ico" />
+    <link rel="stylesheet" href="../style.css" />
+    <!-- Link to the external CSS -->
     <script src="/socket.io/socket.io.js"></script>
-    <style>
-      /* Your original styles */
-    </style>
     <script>
       const socket = io();
-      const lobbyName = "lobby’2’"; // Define the correct lobby name
+      const lobbyName = "lobby'2'"; // Define the correct lobby name
 
       // Retrieve or prompt for username from sessionStorage (tab-specific)
       let username = sessionStorage.getItem("username");
@@ -74,7 +73,7 @@
   </head>
   <body>
     <header>
-      <h1>Welcome to Immuno Chat - Lobby ‘2’</h1>
+      <h1>Welcome to Immuno Chat - Lobby '2'</h1>
       <p>Your username: <span id="username-display"></span></p>
     </header>
     <div id="chat"></div>
@@ -114,7 +113,3 @@
     </footer>
   </body>
 </html>
-
-
-
-
