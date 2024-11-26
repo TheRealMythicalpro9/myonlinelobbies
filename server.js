@@ -1,93 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <title>Immuno Chat - Lobby 1</title>
-    <link rel="shortcut icon" type="image/x-icon" href="Logo.ico" />
-    <script src="/socket.io/socket.io.js"></script>
-    <style>
-      /* Your previous styles here */
-    </style>
-    <script>
-      const socket = io();
-      let username = localStorage.getItem("username");
-      let lobbyName = "lobby1"; // Define the lobby name for this page
+const express = require("express");
+const http = require("http");
+const socketIo = require("socket.io");
 
-      if (!username) {
-        username = prompt("Enter Username");
-        while (
-          !username ||
-          username.trim().length < 3 ||
-          username.trim().length > 20
-        ) {
-          username = prompt("Enter a valid username (3-20 characters):");
-        }
-        username = username.trim();
-        localStorage.setItem("username", username); // Save username to localStorage
-      }
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-      socket.emit("setUsername", username); // Set username on the server
-      socket.emit("joinLobby", lobbyName); // Join a specific lobby
+app.use(express.static("public")); // Serve static files
 
-      // Listen for incoming chat messages
-      socket.on("chatMessage", function (data) {
-        const chatBox = document.getElementById("chat");
-        const messageElement = document.createElement("div");
-        messageElement.className = "chatmessage";
-        messageElement.innerHTML = data;
-        chatBox.appendChild(messageElement);
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
+// Serve homepage
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
+});
 
-      // Send a message to the server
-      function enter() {
-        const textbox = document.getElementById("textbox");
-        const message = textbox.value;
-        if (message.replace(/\s/g, "").length) {
-          textbox.value = "";
-          const formattedMessage =
-            "<b>[" +
-            username +
-            "]: </b>" +
-            message +
-            "<span style='color:grey;'> [" +
-            new Date().toLocaleTimeString().split(":")[0] +
-            ":" +
-            new Date().toLocaleTimeString().split(":")[1] +
-            "]</span>";
-          socket.emit("chatMessage", { lobbyName, message: formattedMessage }); // Send to specific lobby
-        }
-      }
+// Serve lobby pages dynamically
+for (let i = 1; i <= 25; i++) {
+  app.get(`/lobby${i}`, (req, res) => {
+    res.sendFile(__dirname + `/public/lobbies/lobby${i}/lobby${i}.html`);
+  });
+}
 
-      // Clear the username and reload
-      function clearUsername() {
-        localStorage.removeItem("username");
-        location.reload();
-      }
-    </script>
-  </head>
-  <body>
-    <header>
-      <h1>Welcome to Immuno Chat - Lobby 1</h1>
-      <p>Your username: <span id="username-display"></span></p>
-    </header>
-    <div id="chat"></div>
-    <div>
-      <input
-        type="text"
-        id="textbox"
-        placeholder="Type your message here..."
-        onkeypress="if(event.keyCode == 13) enter();"
-      />
-      <button onclick="enter()">Send</button>
-    </div>
-    <button id="change-username-btn" onclick="clearUsername()">
-      Change Username
-    </button>
-    <script>
-      document.getElementById("username-display").textContent = username;
-    </script>
-    <footer>
-      <!-- Your footer content here -->
-    </footer>
-  </body>
-</html>
+// Store connected users by socket ID
+let users = {};
+let lobbies = {}; // Store sockets for each lobby
+
+// Socket.IO logic
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
+
+  // Set username for the user
+  socket.on("setUsername", (username) => {
+    users[socket.id] = username;
+    console.log(`${username} connected with socket id: ${socket.id}`);
+  });
+
+  // Join a specific lobby
+  socket.on("joinLobby", (lobbyName) => {
+    if (!lobbies[lobbyName]) lobbies[lobbyName] = [];
+    lobbies[lobbyName].push(socket.id);
+    socket.join(lobbyName);
+    console.log(`Socket ${socket.id} joined lobby ${lobbyName}`);
+  });
+
+  // Handle chat messages from clients
+  socket.on("chatMessage", (data) => {
+    const { lobbyName, message } = data;
+    io.to(lobbyName).emit("chatMessage", message); // Broadcast message to specific lobby
+  });
+
+  // Handle disconnection
+  socket.on("disconnect", () => {
+    console.log("A user disconnected:", socket.id);
+    // Remove user from all lobbies they were in
+    for (const lobbyName in lobbies) {
+      lobbies[lobbyName] = lobbies[lobbyName].filter((id) => id !== socket.id);
+      if (lobbies[lobbyName].length === 0) delete lobbies[lobbyName]; // Cleanup empty lobbies
+    }
+    delete users[socket.id]; // Remove user from the list
+  });
+});
+
+// Start the server
+const PORT = 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
