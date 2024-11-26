@@ -9,11 +9,12 @@
     </style>
     <script>
       const socket = io();
-      const lobbyName = "lobby’7’"; // Define the lobby name
+      const lobbyName = "lobby’7’"; // Define the correct lobby name
 
-      // Retrieve or prompt for username
-      let username = localStorage.getItem("username");
+      // Retrieve or prompt for username from sessionStorage (tab-specific)
+      let username = sessionStorage.getItem("username");
       if (!username) {
+        // If no username in sessionStorage, prompt the user for one
         username = prompt("Enter Username");
         while (
           !username ||
@@ -23,7 +24,7 @@
           username = prompt("Enter a valid username (3-20 characters):");
         }
         username = username.trim();
-        localStorage.setItem("username", username); // Save username to localStorage
+        sessionStorage.setItem("username", username); // Save username to sessionStorage
       }
 
       // Emit username and join the lobby
@@ -64,9 +65,9 @@
         }
       }
 
-      // Clear username and reload
+      // Clear username and reload the page
       function clearUsername() {
-        localStorage.removeItem("username");
+        sessionStorage.removeItem("username");
         location.reload();
       }
     </script>
@@ -113,5 +114,7 @@
     </footer>
   </body>
 </html>
+
+
 
 
